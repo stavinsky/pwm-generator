@@ -1,0 +1,71 @@
+name: Presubmit Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    container: charlesnicholson/circleci-images:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pylint build.py
+        run: python3 -m pylint build.py
+  linux-gcc:
+    runs-on: ubuntu-latest
+    container: charlesnicholson/circleci-images:latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+        architecture: ['', --build-32-bit]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        env:
+          CC: /usr/bin/gcc
+          CXX: /usr/bin/g++
+        run: ./b --cfg ${{ matrix.configuration }} ${{ matrix.architecture }} -v
+  linux-clang:
+    runs-on: ubuntu-latest
+    container: charlesnicholson/circleci-images:latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        env:
+          CC: /usr/bin/clang
+          CXX: /usr/bin/clang++
+        run: ./b --cfg ${{ matrix.configuration }} -v
+  macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Build
+        run: ./b --cfg ${{ matrix.configuration }} -v
+  win:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        architecture: [32, 64]
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Build
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars${{ matrix.architecture }}.bat"
+          python.exe build.py --cfg ${{ matrix.configuration }} -v
