@@ -1,5 +1,5 @@
 #include "ui.h"
-
+#include "pwm.h"
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/timer.h>
@@ -28,6 +28,7 @@ int enc_get_new_moves(void){
     }
 
     old = counter;
+    lv_label_set_text_fmt(test_label, "   %d ", counter);
     return diff;
 }
 
@@ -45,6 +46,7 @@ static void freq_event_cb(lv_obj_t * obj, lv_event_t event){
                 }
                 char buff[20] = "";
                 sprintf(buff, "freq %d", freq_val);
+                set_period(freq_val, duty_val);
                 lv_textarea_set_text(obj, buff);
                 break;
             }
@@ -67,6 +69,7 @@ static void duty_event_cb(lv_obj_t * obj, lv_event_t event){
                 char buff[20] = "";
                 sprintf(buff, "duty %d", duty_val);
                 lv_textarea_set_text(obj, buff);
+                set_period(freq_val, duty_val);
                 break;
             }
 
@@ -87,7 +90,7 @@ void encoder_init(void )
 {
 	timer_disable_counter(TIM4);
     rcc_periph_clock_enable(RCC_GPIOD);
-	gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_TIM4_REMAP );
+	// gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_TIM4_REMAP );
 	rcc_periph_clock_enable(RCC_TIM4);
 	timer_set_period(TIM4, 4096);
 	timer_slave_set_mode(TIM4, 0x3);
@@ -106,12 +109,13 @@ void encoder_init(void )
 
 void ui_init(void){
 	lv_init();
-	rcc_periph_clock_enable(RCC_GPIOA);
+	rcc_periph_clock_enable(RCC_GPIOD);
 	rcc_periph_clock_enable(RCC_GPIOB);
+	rcc_periph_clock_enable(RCC_GPIOC);
 
-	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, CS|WR|RS|RST|LED|RD);
-	gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, 0xff);
-	gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, 0xFF);
+	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, CS|WR|RS|RST|RD);
+	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, LED);
+	gpio_set_mode(GPIOD, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, 0xFF);
 
 
 	lcd_init();

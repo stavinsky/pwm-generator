@@ -13,11 +13,11 @@ void pwm_init(void)
     rcc_periph_clock_enable(RCC_GPIOB);
     rcc_periph_clock_enable(RCC_AFIO);
 
-   gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
+    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
               GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,
               GPIO_TIM1_CH1 | GPIO_TIM1_CH2 );
 
-   rcc_periph_reset_pulse(RST_TIM1);
+    rcc_periph_reset_pulse(RST_TIM1);
 
     timer_set_mode(TIM1, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_CENTER_1, TIM_CR1_DIR_UP);
     timer_set_prescaler(TIM1, 0);

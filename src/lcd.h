@@ -4,21 +4,36 @@
 #include "stdint.h"
 #include "lvgl.h"
 #include <libopencm3/stm32/gpio.h>
-#define RST 1<<1
-#define LED 1<<0
-#define RD 1<<10
-#define WR 1<<11
-#define CS 1<<8
-#define RS 1<<9
-#define DISP_PORT GPIOA
+
+#define RST GPIO7
+#define RST_PORT GPIOB
+
+#define LED GPIO12
+#define LED_PORT GPIOC
+
+#define RD GPIO6
+#define RD_PORT GPIOB
+
+#define WR GPIO5
+#define WR_PORT GPIOB
+
+#define CS GPIO3
+#define CS_PORT GPIOB
+
+#define RS GPIO4
+#define RS_PORT GPIOB
+
+#define DISP_PORT GPIOD
 
 #define disp_size_x 239
 #define disp_size_y 319
 
-#define set_high(reg, bit) reg |= bit
-#define set_low(reg, bit) reg &= ~(bit)
+//#define set_high(reg, bit) reg |= bit
+#define set_high(port, bit) gpio_set(port, bit)
+//#define set_low(reg, bit) reg &= ~(bit)
+#define set_low(port, bit) gpio_clear(port, bit)
 
-#define pulse_low(reg, bit) set_low(reg, bit); set_high(reg, bit);
+#define pulse_low(port, bit) set_low(port, bit); set_high(port, bit);
 
 void lcd_init(void);
 
