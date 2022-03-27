@@ -4,38 +4,38 @@
 int8_t fch, bcl, fcl, bch;
 
 bool _transparent=false;
-static inline void write_bus_8(uint8_t VL){
-    /*uint8_t mask = 0xFF;*/
-    /*GPIOA->ODR = (GPIOA->ODR & ~mask ) | ( VL & mask);*/
-    GPIOD_BSRR  = VL | 0x00FF0000;
-    pulse_low(GPIOB, WR);
-    /*GPIOA->ODR = VL;*/
-    /*pulse_low(GPIOB->ODR, WR);*/
-}
+// static inline void write_bus_8(uint8_t VL){
+//     /*uint8_t mask = 0xFF;*/
+//     /*GPIOA->ODR = (GPIOA->ODR & ~mask ) | ( VL & mask);*/
+//     GPIOD_BSRR  = VL | 0x00FF0000;
+//     pulse_low(GPIOB, WR);
+//     /*GPIOA->ODR = VL;*/
+//     /*pulse_low(GPIOB->ODR, WR);*/
+// }
 
-static inline void  write_bus(uint8_t VH, uint8_t VL){
-    write_bus_8(VH);
-    write_bus_8(VL);
+// static inline void  write_bus(uint8_t VH, uint8_t VL){
+//     write_bus_8(VH);
+//     write_bus_8(VL);
 
-}
-static inline void write_com(uint8_t VL)
-{
-    set_low(GPIOB, RS);
-    write_bus(0x00,VL);
-    set_high(GPIOB, RS);
-}
+// }
+// static inline void write_com(uint8_t VL)
+// {
+//     set_low(GPIOB, RS);
+//     write_bus(0x00,VL);
+//     set_high(GPIOB, RS);
+// }
 
-static inline void write_data(uint8_t VH, uint8_t VL)
-{
-    //set_high(GPIOB->ODR, RS);
-    write_bus(VH, VL);
-}
+// static inline void write_data(uint8_t VH, uint8_t VL)
+// {
+//     //set_high(GPIOB->ODR, RS);
+//     write_bus(VH, VL);
+// }
 
-static inline void write_com_data(uint8_t com, uint16_t data)
-{
-    write_com(com);
-    write_data(data>>8, data & 0x00FF);
-}
+// static inline void write_com_data(uint8_t com, uint16_t data)
+// {
+//     write_com(com);
+//     write_data(data>>8, data & 0x00FF);
+// }
 
 /*static inline uint16_t read_bus(){*/
 /*    uint8_t high=0;*/
@@ -178,9 +178,7 @@ void my_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * 
     set_high(GPIOB, RS);
     lv_color_t *end_p = color_p + (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
     while ( color_p < end_p){
-            vh = (color_p->full) >> 8;
-            vl = (color_p->full) & 0x00FF;
-            write_bus(vh,vl);
+            write_bus_16(color_p->full);
             color_p++;
     }
     lv_disp_flush_ready(disp_drv);

@@ -30,9 +30,14 @@
 
 
 #define set_high(reg, bit) GPIO_BSRR(reg) = bit
-#define set_low(reg, bit) GPIO_BSRR(reg) = bit << 16
-
+#define set_low(reg, bit) GPIO_BSRR(reg) = (bit) << 16
 #define pulse_low(port, bit) set_low(port, bit); set_high(port, bit);
+#define write_bus_8(bus)     GPIO_BSRR(DISP_PORT)  = (bus) | 0x00FF0000; pulse_low(WR_PORT, WR);
+#define write_bus(VH, VL) write_bus_8(VH); write_bus_8(VL);
+#define write_bus_16(data) write_bus_8((data)>>8); write_bus_8(data&0x00FF);
+#define write_com(VL) set_low(RS_PORT, RS); write_bus(0x00,VL); set_high(RS_PORT, RS);
+#define write_data(VH, VL) write_bus(VH, VL);
+#define write_com_data(com, data) write_com(com); write_data((data)>>8, data&0x00FF);
 
 void lcd_init(void);
 
