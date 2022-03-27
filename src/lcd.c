@@ -171,19 +171,17 @@ static void draw_pixel(int x, int y)
 
 void my_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p){
 
-    uint16_t x, y;
     uint16_t vh, vl;
     lcd_set_xy(area->x1, area->y1, area->x2, area->y2);
     write_com(0x22);
     /*set_high(GPIOB, RD);*/
     set_high(GPIOB, RS);
-    for(y = area->y1; y <= area->y2; y++) {
-        for(x = area->x1; x <= area->x2; x++) {
+    lv_color_t *end_p = color_p + (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
+    while ( color_p < end_p){
             vh = (color_p->full) >> 8;
             vl = (color_p->full) & 0x00FF;
             write_bus(vh,vl);
             color_p++;
-        }
     }
     lv_disp_flush_ready(disp_drv);
 }

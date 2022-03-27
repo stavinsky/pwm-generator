@@ -28,10 +28,9 @@
 #define disp_size_x 239
 #define disp_size_y 319
 
-//#define set_high(reg, bit) reg |= bit
-#define set_high(port, bit) gpio_set(port, bit)
-//#define set_low(reg, bit) reg &= ~(bit)
-#define set_low(port, bit) gpio_clear(port, bit)
+
+#define set_high(reg, bit) GPIO_BSRR(reg) = bit
+#define set_low(reg, bit) GPIO_BSRR(reg) = bit << 16
 
 #define pulse_low(port, bit) set_low(port, bit); set_high(port, bit);
 
