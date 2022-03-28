@@ -4,72 +4,7 @@
 int8_t fch, bcl, fcl, bch;
 
 bool _transparent=false;
-// static inline void write_bus_8(uint8_t VL){
-//     /*uint8_t mask = 0xFF;*/
-//     /*GPIOA->ODR = (GPIOA->ODR & ~mask ) | ( VL & mask);*/
-//     GPIOD_BSRR  = VL | 0x00FF0000;
-//     pulse_low(GPIOB, WR);
-//     /*GPIOA->ODR = VL;*/
-//     /*pulse_low(GPIOB->ODR, WR);*/
-// }
-
-// static inline void  write_bus(uint8_t VH, uint8_t VL){
-//     write_bus_8(VH);
-//     write_bus_8(VL);
-
-// }
-// static inline void write_com(uint8_t VL)
-// {
-//     set_low(GPIOB, RS);
-//     write_bus(0x00,VL);
-//     set_high(GPIOB, RS);
-// }
-
-// static inline void write_data(uint8_t VH, uint8_t VL)
-// {
-//     //set_high(GPIOB->ODR, RS);
-//     write_bus(VH, VL);
-// }
-
-// static inline void write_com_data(uint8_t com, uint16_t data)
-// {
-//     write_com(com);
-//     write_data(data>>8, data & 0x00FF);
-// }
-
-/*static inline uint16_t read_bus(){*/
-/*    uint8_t high=0;*/
-/*    uint8_t low=0;*/
-/*    set_low(GPIOB, RD);*/
-/*    high = GPIOA_IDR & 0x00FF;*/
-/*    set_high(GPIOB, RD);*/
-/*    set_low(GPIOB, RD);*/
-/*    low = GPIOA_IDR & 0x00FF;*/
-/*    set_high(GPIOB, RD);*/
-/*    set_low(GPIOB, RD);*/
-/*    return (high << 8) | low;*/
-
-/*}*/
-/*static inline uint16_t read_data(){*/
-/*    uint16_t r = 0;*/
-/*    GPIOA_ODR = 0x00;*/
-/*    GPIOA_CRL = 0x88888888;*/
-/*    set_high(GPIOB, RS);*/
-/*    set_high(GPIOB, WR);*/
-/*    r = read_bus();*/
-/*    GPIOA_CRL = 0x33333333;*/
-/*    return r;*/
-/*}*/
-
-/*static inline uint16_t read_com_data(uint8_t com)*/
-/*{*/
-/*    uint16_t data =0 ;*/
-/*    write_com(com);*/
-/*    data = read_data();*/
-/*    return data;*/
-/*}*/
-
-
+static void lcd_clear_xy(void);
 void lcd_init()
 {
     set_high(GPIOB, RD);
@@ -132,7 +67,7 @@ void lcd_set_color(uint8_t r, uint8_t g, uint8_t b)
 }
 
 
-void inline lcd_set_xy(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
+inline void lcd_set_xy(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
     write_com_data(0x46,(x2 << 8) | x1);
     write_com_data(0x47,y2);
     write_com_data(0x48,y1);
@@ -148,7 +83,6 @@ static void lcd_clear_xy()
 void lcd_fill_rect(long pix)
 {
 	write_com(0x22);
-	/*set_high(GPIOB, RD);*/
 	set_high(GPIOB, RS);
 
 	for (int i =0 ; i<pix; i++){
@@ -171,11 +105,8 @@ static void draw_pixel(int x, int y)
 
 void my_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p){
 
-    uint16_t vh, vl;
     lcd_set_xy(area->x1, area->y1, area->x2, area->y2);
     write_com(0x22);
-    /*set_high(GPIOB, RD);*/
-    set_high(GPIOB, RS);
     lv_color_t *end_p = color_p + (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
     while ( color_p < end_p){
             write_bus_16(color_p->full);

@@ -3,6 +3,8 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/timer.h>
+#include <stdio.h>
+
 lv_obj_t * ta_freq;
 lv_obj_t * ta_duty;
 
@@ -36,7 +38,7 @@ static void freq_event_cb(lv_obj_t * obj, lv_event_t event){
     switch(event) {
         case LV_EVENT_KEY:
             {
-                uint32_t * key = lv_event_get_data();
+                const uint32_t * key = lv_event_get_data();
                 if ((*key == 19) & (freq_val >0)){
                     freq_val--;
                 }
@@ -58,7 +60,7 @@ static void duty_event_cb(lv_obj_t * obj, lv_event_t event){
     switch(event) {
         case LV_EVENT_KEY:
             {
-                uint32_t * key = lv_event_get_data();
+                const uint32_t * key = lv_event_get_data();
                 if ((*key == 19) & (duty_val >0) ){
                     duty_val--;
                 }

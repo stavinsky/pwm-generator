@@ -73,13 +73,13 @@ void pwm_init(void)
 void set_period(int freq, int duty){
     static int cur_freq = 0;
     static int cur_duty = 0;
-    if (cur_duty == duty & cur_freq == freq){
+    if ((cur_duty == duty) & (cur_freq == freq)){
         return;
     }
     freq = freq * 1000 * 2;
     uint16_t period = 72000000 / freq;
     uint16_t cmp = (period / 100.0) * duty/2.;
-    if(period>0 & duty>0){
+    if((period>0) & (duty>0)){
         timer_set_period(TIM1, period);
         timer_set_oc_value(TIM1, TIM_OC1, cmp);
         timer_set_oc_value(TIM1, TIM_OC2, period - cmp);

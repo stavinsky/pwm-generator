@@ -12,6 +12,7 @@
 #include "ui.h"
 #include "pwm.h"
 #include "stdlib.h"
+void encoder_button_init(void);
 void sys_tick_handler(void)
 {
     lv_tick_inc(1);
@@ -59,12 +60,10 @@ int main(void){
     encoder_button_init();
 	pwm_init();
 	ui_init();
-    int diff = 0;
-
 
     while (1) {
 		lv_task_handler();
-		msleep(50);
+		msleep(20);
         // set_period(freq_val, duty_val);
 
         // diff= enc_get_new_moves();

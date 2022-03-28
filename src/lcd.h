@@ -37,7 +37,7 @@
 #define write_bus_16(data) write_bus_8((data)>>8); write_bus_8(data&0x00FF);
 #define write_com(VL) set_low(RS_PORT, RS); write_bus(0x00,VL); set_high(RS_PORT, RS);
 #define write_data(VH, VL) write_bus(VH, VL);
-#define write_com_data(com, data) write_com(com); write_data((data)>>8, data&0x00FF);
+#define write_com_data(com, data) write_com(com); write_data(((data)>>8), (( data)&0x00FF));
 
 void lcd_init(void);
 
