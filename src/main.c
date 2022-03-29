@@ -63,7 +63,7 @@ int main(void){
 
     while (1) {
 		lv_task_handler();
-		msleep(20);
+		msleep(50);
         // set_period(freq_val, duty_val);
 
         // diff= enc_get_new_moves();

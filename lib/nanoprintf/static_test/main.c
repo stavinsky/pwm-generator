@@ -31,7 +31,7 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist) {
     return 0;
 }
 
-extern void do_private_nanoprintf_stuff();
+extern void do_private_nanoprintf_stuff(void);
 
 int main(void) {
     do_private_nanoprintf_stuff();

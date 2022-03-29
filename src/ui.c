@@ -5,10 +5,15 @@
 #include <libopencm3/stm32/timer.h>
 #include <stdio.h>
 
-lv_obj_t * ta_freq;
-lv_obj_t * ta_duty;
+// lv_obj_t * ta_freq;
+// lv_obj_t * ta_duty;
 
 lv_obj_t * test_label;
+lv_obj_t * duty_slider;
+lv_obj_t * duty_slider_label;
+lv_obj_t * freq_slider;
+lv_obj_t * freq_slider_label;
+
 
 int freq_val = 0;
 int duty_val = 0;
@@ -33,60 +38,59 @@ int enc_get_new_moves(void){
     lv_label_set_text_fmt(test_label, "   %d ", counter);
     return diff;
 }
+static void freq_slider_event_cb(lv_event_t *event) {
+    lv_obj_t * slider = lv_event_get_target(event);
+    char buf[8];
+    lv_snprintf(buf, sizeof(buf), "%d%%", (int)lv_slider_get_value(slider));
+    lv_label_set_text(freq_slider_label, buf);
 
-static void freq_event_cb(lv_obj_t * obj, lv_event_t event){
-    switch(event) {
-        case LV_EVENT_KEY:
-            {
-                const uint32_t * key = lv_event_get_data();
-                if ((*key == 19) & (freq_val >0)){
-                    freq_val--;
-                }
-                if ((*key == 20) & (freq_val <500))
-                {
-                    freq_val++;
-                }
-                char buff[20] = "";
-                sprintf(buff, "freq %d", freq_val);
-                set_period(freq_val, duty_val);
-                lv_textarea_set_text(obj, buff);
-                break;
-            }
+}
+static void duty_slider_event_cb(lv_event_t *event) {
+    lv_obj_t * slider = lv_event_get_target(event);
+    char buf[8];
+    lv_snprintf(buf, sizeof(buf), "%d%%", (int)lv_slider_get_value(slider));
+    lv_label_set_text(duty_slider_label, buf);
 
+}
+static void freq_event_cb(lv_event_t *event){
+    uint32_t key = lv_indev_get_key(lv_indev_get_act());;
+    lv_obj_t * obj = lv_event_get_target(event);
+    if ((key == 19) & (freq_val >0)){
+        freq_val--;
     }
+    if ((key == 20) & (freq_val <500))
+    {
+        freq_val++;
+    }
+    char buff[20] = "";
+    sprintf(buff, "freq %d", freq_val);
+    set_period(freq_val, duty_val);
+    lv_textarea_set_text(obj, buff);
+
 }
 
-static void duty_event_cb(lv_obj_t * obj, lv_event_t event){
-    switch(event) {
-        case LV_EVENT_KEY:
-            {
-                const uint32_t * key = lv_event_get_data();
-                if ((*key == 19) & (duty_val >0) ){
-                    duty_val--;
-                }
-                if ((*key == 20) & (duty_val <99))
-                {
-                    duty_val++;
-                }
-                char buff[20] = "";
-                sprintf(buff, "duty %d", duty_val);
-                lv_textarea_set_text(obj, buff);
-                set_period(freq_val, duty_val);
-                break;
-            }
-
+static void duty_event_cb(lv_event_t *event){
+    uint32_t key = lv_indev_get_key(lv_indev_get_act());
+    lv_obj_t * obj = lv_event_get_target(event);
+    if ((key == 19) & (duty_val >0) ){
+        duty_val--;
     }
+    if ((key == 20) & (duty_val <99))
+    {
+        duty_val++;
+    }
+    char buff[20] = "";
+    sprintf(buff, "duty %d", duty_val);
+    lv_textarea_set_text(obj, buff);
+    set_period(freq_val, duty_val);
 }
 
-bool encoder_read(lv_indev_drv_t * drv, lv_indev_data_t*data){
+void encoder_read(lv_indev_drv_t * drv, lv_indev_data_t*data){
   data->enc_diff = enc_get_new_moves();
   if(button_pressed == true ) {
-    data->state = LV_INDEV_STATE_PR;
+    data->state = LV_INDEV_STATE_PRESSED;
   }
-  else data->state = LV_INDEV_STATE_REL;
-  /*data->state = LV_INDEV_STATE_REL;*/
-
-  return false; /*No buffering now so no more data read*/
+  else data->state = LV_INDEV_STATE_RELEASED;
 }
 void encoder_init(void )
 {
@@ -101,7 +105,7 @@ void encoder_init(void )
     timer_set_counter(TIM4, 0);
 	timer_enable_counter(TIM4);
 
-    lv_indev_drv_t indev_drv;
+    static lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_ENCODER;
     indev_drv.read_cb = encoder_read;
@@ -127,45 +131,63 @@ void ui_init(void){
 	lcd_fill_rect(disp_size_x*disp_size_y+2);
 
 
-	static lv_disp_buf_t draw_buf_dsc_1;
-	static lv_color_t draw_buf_1[LV_HOR_RES_MAX * 20];
-	lv_disp_buf_init(&draw_buf_dsc_1, draw_buf_1, NULL, LV_HOR_RES_MAX * 20);
+	static lv_disp_draw_buf_t disp_buf;
+	static lv_color_t buf_1[disp_size_x * 35];
+	lv_disp_draw_buf_init(&disp_buf, buf_1, NULL, disp_size_x * 25);
 
 
-	lv_disp_drv_t disp_drv;
+	static lv_disp_drv_t disp_drv;
 	lv_disp_drv_init(&disp_drv);
 
-	disp_drv.hor_res = 240;
-	disp_drv.ver_res = 320;
-	disp_drv.antialiasing=1;
+	// disp_drv.antialiasing=1;
 
+	disp_drv.draw_buf = &disp_buf;
 	disp_drv.flush_cb = my_flush_cb;
+	disp_drv.hor_res = disp_size_x;
+	disp_drv.ver_res = disp_size_y;
 
-	disp_drv.buffer = &draw_buf_dsc_1;
-	lv_disp_drv_register(&disp_drv);
+    lv_disp_t * disp;
+	disp = lv_disp_drv_register(&disp_drv);
 
-	lv_obj_t * scr1 = lv_obj_create(NULL, NULL);
+	lv_obj_t * scr1 = lv_obj_create(NULL);
 	lv_scr_load(scr1);
 
     encoder_init();
     g = lv_group_create();
     lv_indev_set_group(encoder_indev, g);
+    lv_group_set_default(g);
 
-	ta_freq = lv_textarea_create(lv_scr_act(), NULL);
-	lv_obj_set_size(ta_freq, 200, 80);
-    lv_obj_set_event_cb(ta_freq, freq_event_cb);
-    lv_textarea_set_text(ta_freq, "freq 0");
-    lv_group_add_obj(g, ta_freq);
+	// ta_freq = lv_textarea_create(lv_scr_act());
+	// lv_obj_set_size(ta_freq, 200, 50);
+    // lv_obj_add_event_cb(ta_freq, freq_event_cb, LV_EVENT_SCROLL, NULL);
+    // lv_textarea_set_text(ta_freq, "freq 0");
+    // lv_group_add_obj(g, ta_freq);
 
-	ta_duty = lv_textarea_create(lv_scr_act(), NULL);
-	lv_obj_align(ta_duty, ta_freq, LV_ALIGN_OUT_BOTTOM_LEFT, 0,10);
-	lv_obj_set_size(ta_duty, 200, 50);
-    lv_textarea_set_text(ta_duty, "duty 0");
-    lv_obj_set_event_cb(ta_duty, duty_event_cb);
-    lv_group_add_obj(g, ta_duty);
+	// ta_duty = lv_textarea_create(lv_scr_act());
+	// lv_obj_align(ta_duty, LV_ALIGN_OUT_BOTTOM_LEFT, 0,100);
+	// lv_obj_set_size(ta_duty, 200, 50);
+    // lv_textarea_set_text(ta_duty, "duty 0");
+    // lv_obj_add_event_cb(ta_duty, duty_event_cb, LV_EVENT_KEY, NULL);
+    // lv_group_add_obj(g, ta_duty);
 
-    test_label = lv_label_create(lv_scr_act(), NULL);
-    lv_obj_align(test_label, NULL, LV_ALIGN_IN_BOTTOM_LEFT, 0, -5);
+
+    freq_slider = lv_slider_create(lv_scr_act());
+    lv_obj_add_event_cb(freq_slider, freq_slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_slider_set_range(freq_slider, 0, 500);
+    freq_slider_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(freq_slider_label, "0%");
+    lv_obj_align_to(freq_slider_label, freq_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+
+    duty_slider = lv_slider_create(lv_scr_act());
+    lv_obj_add_event_cb(duty_slider, duty_slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_align_to(duty_slider, freq_slider, LV_ALIGN_BOTTOM_LEFT, 0, 50);
+    lv_slider_set_range(duty_slider, 0, 100);
+    duty_slider_label = lv_label_create(lv_scr_act());
+    lv_label_set_text(duty_slider_label, "0%");
+    lv_obj_align_to(duty_slider_label, duty_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+
+    test_label = lv_label_create(lv_scr_act());
+    lv_obj_align(test_label, LV_ALIGN_OUT_TOP_LEFT, 0, 210);
     lv_label_set_text(test_label, "encoder");
 
 }
