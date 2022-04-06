@@ -12,6 +12,7 @@
 #include "ui.h"
 #include "pwm.h"
 #include "stdlib.h"
+#include <libopencm3/stm32/dma.h>
 void encoder_button_init(void);
 void sys_tick_handler(void)
 {
@@ -46,24 +47,41 @@ void encoder_button_init(void){
     exti_select_source(EXTI14, GPIOD);
     exti_set_trigger(EXTI14, EXTI_TRIGGER_FALLING);
     exti_enable_request(EXTI14);
-
+    
 }
+
 int main(void){
 
     rcc_periph_clock_enable(RCC_AFIO);
-	gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_SPI3_REMAP|AFIO_MAPR_TIM4_REMAP );
+	gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_SPI3_REMAP|AFIO_MAPR_TIM4_REMAP| AFIO_MAPR_TIM3_REMAP_PARTIAL_REMAP );
     rcc_clock_setup_in_hse_8mhz_out_72mhz();
     systick_set_frequency(1000, 36000000);
     systick_counter_enable();
     nvic_set_priority(NVIC_SYSTICK_IRQ, 0);
+    nvic_enable_irq(NVIC_DMA1_CHANNEL3_IRQ);
+    nvic_set_priority(NVIC_SYSTICK_IRQ, 1);
     systick_interrupt_enable();
-    encoder_button_init();
-	pwm_init();
-	ui_init();
+    // encoder_button_init();
+	// pwm_init();
+	// ui_init();
+	rcc_periph_clock_enable(RCC_GPIOD);
+	rcc_periph_clock_enable(RCC_GPIOB);
+	rcc_periph_clock_enable(RCC_GPIOC);
 
+	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, CS|RS|RST|RD);
+	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, LED);
+	gpio_set_mode(GPIOD, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, 0xFF);
+    gpio_clear(GPIOD, GPIO5);
+    set_high(CS_PORT, CS);
+    // lcd_init();
+    //test_fill_display(0x00);
+    msleep(1000);
+    dma_timer_init();
     while (1) {
-		lv_task_handler();
-		msleep(50);
+		//lv_task_handler();
+        test_fill_display2();
+        // tm_start(4);
+		msleep(100);
         // set_period(freq_val, duty_val);
 
         // diff= enc_get_new_moves();
@@ -71,6 +89,7 @@ int main(void){
         //     lv_label_set_text_fmt(test_label, "   %d ", diff);
         // }
         /*[>__asm__("wfe");<]*/
+        // asm ("nop");
     }
 
 }

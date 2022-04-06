@@ -49,3 +49,7 @@ void lcd_set_pixel_color(unsigned int color);
 void lcd_set_color(uint8_t r, uint8_t g, uint8_t b);
 
 void my_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p);
+void test_fill_display(uint16_t);
+void test_fill_display2(void);
+void tm_start(int);
+void dma_timer_init(void);
