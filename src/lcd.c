@@ -11,6 +11,8 @@ int8_t fch, bcl, fcl, bch;
 uint16_t c;
 uint16_t test_data_out = 0x00;
 #define  period 14 
+#define timer_master TIM5
+#define timer_slave TIM3
 bool _transparent=false;
 static void lcd_clear_xy(void);
 void lcd_init()
@@ -145,24 +147,14 @@ void test_fill_display(uint16_t color) {
 //     TIM_SR(TIM5) &= ~TIM_SR_UIF;
 // }
 void dma1_channel3_isr() {
-    if (dma_get_interrupt_flag(DMA1, DMA_CHANNEL3, DMA_HTIF)){
-        asm ("nop");
-    }
     if (dma_get_interrupt_flag(DMA1, DMA_CHANNEL3, DMA_TCIF)){
-        timer_set_counter(TIM3, 0);
+        timer_set_counter(timer_slave, 0);
         lv_disp_flush_ready(&disp_drv);
         dma_disable_channel(DMA1, DMA_CHANNEL3);
-    }
-    
-    if (dma_get_interrupt_flag(DMA1, DMA_CHANNEL3, DMA_TEIF)){
-        // dma_disable_channel(DMA1, DMA_CHANNEL3);
-        asm ("nop"); 
     }
     dma_clear_interrupt_flags(DMA1, DMA_CHANNEL3, DMA_HTIF|DMA_TCIF|DMA_TEIF|DMA_GIF);
 }
 void tm_start(int times){
-    uint32_t timer_master = TIM5;
-    uint32_t timer_slave = TIM3;
     timer_disable_counter(timer_slave);
     timer_set_oc_value(timer_master, TIM_OC4, times);
     // timer_set_counter(timer_slave, 0);
@@ -170,8 +162,6 @@ void tm_start(int times){
     timer_enable_counter(timer_slave);
 }
 void dma_timer_init() {
-    uint32_t timer_master = TIM5;
-    uint32_t timer_slave = TIM3;
     rcc_periph_clock_enable(RCC_TIM5); 
     rcc_periph_clock_enable(RCC_GPIOA);
     rcc_periph_clock_enable(RCC_GPIOB);
@@ -238,46 +228,13 @@ void dma_init(){
 	dma_disable_peripheral_increment_mode(DMA1, DMA_CHANNEL3); 
     dma_set_read_from_memory(DMA1, DMA_CHANNEL3);
     dma_enable_memory_increment_mode(DMA1, DMA_CHANNEL3);
-    dma_enable_half_transfer_interrupt(DMA1, DMA_CHANNEL3);
+    // dma_enable_half_transfer_interrupt(DMA1, DMA_CHANNEL3);
     dma_enable_transfer_complete_interrupt(DMA1, DMA_CHANNEL3);
-    dma_enable_transfer_error_interrupt(DMA1, DMA_CHANNEL3);
+    // dma_enable_transfer_error_interrupt(DMA1, DMA_CHANNEL3);
     dma_set_peripheral_address(DMA1, DMA_CHANNEL3, (uint32_t)&GPIO_ODR(GPIOD));
     dma_set_priority(DMA1, DMA_CHANNEL3, DMA_CCR_PL_VERY_HIGH);
 }
-void test_fill_display2(uint16_t *color_p, uint16_t x1,uint16_t x2,uint16_t y1,uint16_t y2) {
-    uint32_t size = (x2 - x1 + 1) * (y2 - y1 + 1);
-    size = size * 2;
-    //12050
-    GPIO_ODR(GPIOD) = 0x00;
-    gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, WR);
-    // pulse_low(WR_PORT, WR);
-    lcd_set_xy(x1, y1, x2, y2);
-    write_com(0x22);
-    GPIO_ODR(GPIOD) = 0x00;
-    pulse_low(WR_PORT, WR);
-    pulse_low(WR_PORT, WR);
-    GPIO_ODR(GPIOD) = color_p[0] >>8;
-    gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, WR);
 
-    dma_channel_reset(DMA1, DMA_CHANNEL3);
-    dma_set_peripheral_address(DMA1, DMA_CHANNEL3, (uint32_t)&GPIO_ODR(GPIOD));
-    dma_set_memory_address(DMA1, DMA_CHANNEL3, (uint32_t)color_p);
-    dma_set_number_of_data(DMA1, DMA_CHANNEL3, size);
-    dma_set_priority(DMA1, DMA_CHANNEL3, DMA_CCR_PL_VERY_HIGH);
-
-    dma_set_memory_size(DMA1, DMA_CHANNEL3, DMA_CCR_MSIZE_8BIT);
-    dma_set_peripheral_size(DMA1, DMA_CHANNEL3, DMA_CCR_PSIZE_8BIT);
-	dma_disable_peripheral_increment_mode(DMA1, DMA_CHANNEL3); 
-    dma_set_read_from_memory(DMA1, DMA_CHANNEL3);
-    dma_enable_memory_increment_mode(DMA1, DMA_CHANNEL3);
-    dma_enable_half_transfer_interrupt(DMA1, DMA_CHANNEL3);
-    dma_enable_transfer_complete_interrupt(DMA1, DMA_CHANNEL3);
-    dma_enable_transfer_error_interrupt(DMA1, DMA_CHANNEL3);
-    // timer_generate_event(TIM3, TIM_EGR_CC4G);
-    TIM3_EGR = 0x00;
-    dma_enable_channel(DMA1, DMA_CHANNEL3);
-    tm_start(size );
-}
 
 void my_flush_cb2(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p){
     uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) * 2;
