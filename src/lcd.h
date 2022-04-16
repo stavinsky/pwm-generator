@@ -25,8 +25,8 @@
 
 #define DISP_PORT GPIOD
 
-#define disp_size_x 239
-#define disp_size_y 319
+#define disp_size_x 240 
+#define disp_size_y 320
 
 
 #define set_high(reg, bit) GPIO_BSRR(reg) = bit

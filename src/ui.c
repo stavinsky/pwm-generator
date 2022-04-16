@@ -133,15 +133,15 @@ void ui_init(void){
 
 
 	static lv_disp_draw_buf_t disp_buf;
-	static lv_color_t buf_1[disp_size_x * 40];
-	static lv_color_t buf_2[disp_size_x * 40];
-	lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, disp_size_x * 40);
+	static lv_color_t buf_1[disp_size_x * 20];
+	static lv_color_t buf_2[disp_size_x * 20];
+	lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, disp_size_x * 20);
 
 
 	// static lv_disp_drv_t disp_drv;
 	lv_disp_drv_init(&disp_drv);
 
-	// disp_drv.antialiasing=1;
+	disp_drv.antialiasing=1;
 
 	disp_drv.draw_buf = &disp_buf;
 	disp_drv.flush_cb = my_flush_cb2;

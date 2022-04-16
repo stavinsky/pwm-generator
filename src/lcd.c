@@ -233,6 +233,16 @@ void dma_timer_init() {
 void dma_init(){
     nvic_enable_irq(NVIC_DMA1_CHANNEL3_IRQ);
     rcc_periph_clock_enable(RCC_DMA1);
+    dma_set_memory_size(DMA1, DMA_CHANNEL3, DMA_CCR_MSIZE_8BIT);
+    dma_set_peripheral_size(DMA1, DMA_CHANNEL3, DMA_CCR_PSIZE_8BIT);
+	dma_disable_peripheral_increment_mode(DMA1, DMA_CHANNEL3); 
+    dma_set_read_from_memory(DMA1, DMA_CHANNEL3);
+    dma_enable_memory_increment_mode(DMA1, DMA_CHANNEL3);
+    dma_enable_half_transfer_interrupt(DMA1, DMA_CHANNEL3);
+    dma_enable_transfer_complete_interrupt(DMA1, DMA_CHANNEL3);
+    dma_enable_transfer_error_interrupt(DMA1, DMA_CHANNEL3);
+    dma_set_peripheral_address(DMA1, DMA_CHANNEL3, (uint32_t)&GPIO_ODR(GPIOD));
+    dma_set_priority(DMA1, DMA_CHANNEL3, DMA_CCR_PL_VERY_HIGH);
 }
 void test_fill_display2(uint16_t *color_p, uint16_t x1,uint16_t x2,uint16_t y1,uint16_t y2) {
     uint32_t size = (x2 - x1 + 1) * (y2 - y1 + 1);
@@ -270,27 +280,15 @@ void test_fill_display2(uint16_t *color_p, uint16_t x1,uint16_t x2,uint16_t y1,u
 }
 
 void my_flush_cb2(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p){
-    uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1);
-    size = (size * 2) ;
+    uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) * 2;
     gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, WR);
-    // pulse_low(WR_PORT, WR);
     lcd_set_xy(area->x1, area->y1, area->x2, area->y2);
     write_com(0x22);
 
-    dma_channel_reset(DMA1, DMA_CHANNEL3);
-    dma_set_peripheral_address(DMA1, DMA_CHANNEL3, (uint32_t)&GPIO_ODR(GPIOD));
     dma_set_memory_address(DMA1, DMA_CHANNEL3, (uint32_t)color_p);
     dma_set_number_of_data(DMA1, DMA_CHANNEL3, size);
-    dma_set_priority(DMA1, DMA_CHANNEL3, DMA_CCR_PL_VERY_HIGH);
 
-    dma_set_memory_size(DMA1, DMA_CHANNEL3, DMA_CCR_MSIZE_8BIT);
-    dma_set_peripheral_size(DMA1, DMA_CHANNEL3, DMA_CCR_PSIZE_8BIT);
-	dma_disable_peripheral_increment_mode(DMA1, DMA_CHANNEL3); 
-    dma_set_read_from_memory(DMA1, DMA_CHANNEL3);
-    dma_enable_memory_increment_mode(DMA1, DMA_CHANNEL3);
-    dma_enable_half_transfer_interrupt(DMA1, DMA_CHANNEL3);
-    dma_enable_transfer_complete_interrupt(DMA1, DMA_CHANNEL3);
-    dma_enable_transfer_error_interrupt(DMA1, DMA_CHANNEL3);
+
     GPIO_ODR(GPIOD) = color_p->full >> 8;
     gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, WR);
     // timer_generate_event(TIM3, TIM_EGR_CC4G);
