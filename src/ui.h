@@ -7,6 +7,7 @@
 extern lv_obj_t * test_label;
 extern bool button_pressed;
 extern int freq_val, duty_val;
+extern lv_disp_drv_t disp_drv;
 //extern lv_obj_t *ta_freq;
 
 void ui_init(void);

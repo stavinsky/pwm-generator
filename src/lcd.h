@@ -50,6 +50,8 @@ void lcd_set_color(uint8_t r, uint8_t g, uint8_t b);
 
 void my_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p);
 void test_fill_display(uint16_t);
-void test_fill_display2(void);
+void test_fill_display2(uint16_t *color_p, uint16_t x1,uint16_t x2,uint16_t y1,uint16_t y2);
 void tm_start(int);
 void dma_timer_init(void);
+void my_flush_cb2(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p);
+void dma_init(void);

@@ -61,27 +61,48 @@ int main(void){
     nvic_enable_irq(NVIC_DMA1_CHANNEL3_IRQ);
     nvic_set_priority(NVIC_SYSTICK_IRQ, 1);
     systick_interrupt_enable();
-    // encoder_button_init();
+    encoder_button_init();
 	// pwm_init();
-	// ui_init();
+	ui_init();
 	rcc_periph_clock_enable(RCC_GPIOD);
 	rcc_periph_clock_enable(RCC_GPIOB);
 	rcc_periph_clock_enable(RCC_GPIOC);
 
-	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, CS|RS|RST|RD);
+	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, WR|CS|RS|RST|RD);
 	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, LED);
 	gpio_set_mode(GPIOD, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, 0xFF);
-    gpio_clear(GPIOD, GPIO5);
-    set_high(CS_PORT, CS);
+    // gpio_clear(GPIOD, GPIO5);
+    // set_high(CS_PORT, CS);
     // lcd_init();
-    //test_fill_display(0x00);
-    msleep(1000);
+    // test_fill_display(0xBB);
     dma_timer_init();
+    dma_init();
+    // test_fill_display2();
+    uint16_t color_p[240 * 80];
+    
+    uint16_t c = 0x00;
     while (1) {
-		//lv_task_handler();
-        test_fill_display2();
-        // tm_start(4);
-		msleep(100);
+		lv_task_handler();
+        
+        // tm_start(10000);
+        // for (uint32_t i=0; i<(240*80); i++){
+        //     color_p[i] = 0xabcd;
+        // }
+        // for (int y = 0; y<320; y=y + 5){
+        //     test_fill_display2(color_p, 0, 239, y, y);
+        //     msleep(10);
+        // }
+        msleep(15);
+        // // test_fill_display2(color_p, 0, 239, 80, 81);
+        // msleep(100);
+        // test_fill_display2(color_p, 0, 239, 0, 1);
+        // msleep(100);
+        // test_fill_display2(color_p, 0, 239, 240, 241);
+        // msleep(100);
+        // gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, WR);
+        // test_fill_display(0x00);
+        // c++; 
+        // msleep(100);
         // set_period(freq_val, duty_val);
 
         // diff= enc_get_new_moves();
