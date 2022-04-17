@@ -65,7 +65,6 @@ void encoder_init(void )
 {
 	timer_disable_counter(TIM4);
     rcc_periph_clock_enable(RCC_GPIOD);
-	// gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_TIM4_REMAP );
 	rcc_periph_clock_enable(RCC_TIM4);
 	timer_set_period(TIM4, 4096);
 	timer_slave_set_mode(TIM4, 0x3);
@@ -84,13 +83,13 @@ void encoder_init(void )
 
 void ui_init(void){
 	lv_init();
-	rcc_periph_clock_enable(RCC_GPIOD);
-	rcc_periph_clock_enable(RCC_GPIOB);
-	rcc_periph_clock_enable(RCC_GPIOC);
+	// rcc_periph_clock_enable(RCC_GPIOD);
+	// rcc_periph_clock_enable(RCC_GPIOB);
+	// rcc_periph_clock_enable(RCC_GPIOC);
 
-	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, CS|WR|RS|RST|RD);
-	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, LED);
-	gpio_set_mode(GPIOD, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, 0xFF);
+	// gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, CS|WR|RS|RST|RD);
+	// gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, LED);
+	// gpio_set_mode(GPIOD, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, 0xFF);
 
 
 	lcd_init();
@@ -101,9 +100,9 @@ void ui_init(void){
 
 
 	static lv_disp_draw_buf_t disp_buf;
-	static lv_color_t buf_1[disp_size_x * 20];
-	static lv_color_t buf_2[disp_size_x * 20];
-	lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, disp_size_x * 20);
+	static lv_color_t buf_1[disp_size_x * 50];
+	// static lv_color_t buf_2[disp_size_x * 20];
+	lv_disp_draw_buf_init(&disp_buf, buf_1, NULL, disp_size_x * 50);
 
 
 	// static lv_disp_drv_t disp_drv;
@@ -112,7 +111,7 @@ void ui_init(void){
 	disp_drv.antialiasing=1;
 
 	disp_drv.draw_buf = &disp_buf;
-	disp_drv.flush_cb = my_flush_cb2;
+	disp_drv.flush_cb = my_flush_cb;
 	disp_drv.hor_res = disp_size_x;
 	disp_drv.ver_res = disp_size_y;
 
@@ -126,20 +125,6 @@ void ui_init(void){
     g = lv_group_create();
     lv_indev_set_group(encoder_indev, g);
     lv_group_set_default(g);
-
-	// ta_freq = lv_textarea_create(lv_scr_act());
-	// lv_obj_set_size(ta_freq, 200, 50);
-    // lv_obj_add_event_cb(ta_freq, freq_event_cb, LV_EVENT_SCROLL, NULL);
-    // lv_textarea_set_text(ta_freq, "freq 0");
-    // lv_group_add_obj(g, ta_freq);
-
-	// ta_duty = lv_textarea_create(lv_scr_act());
-	// lv_obj_align(ta_duty, LV_ALIGN_OUT_BOTTOM_LEFT, 0,100);
-	// lv_obj_set_size(ta_duty, 200, 50);
-    // lv_textarea_set_text(ta_duty, "duty 0");
-    // lv_obj_add_event_cb(ta_duty, duty_event_cb, LV_EVENT_KEY, NULL);
-    // lv_group_add_obj(g, ta_duty);
-
 
     freq_slider = lv_slider_create(lv_scr_act());
     lv_obj_add_event_cb(freq_slider, freq_slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
