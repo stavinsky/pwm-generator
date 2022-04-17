@@ -76,7 +76,7 @@ int main(void){
     dma_init();
     while (1) {
         lv_task_handler();
-        msleep(15);
+        msleep(20);
     }
 
 }

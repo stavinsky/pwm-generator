@@ -36,7 +36,7 @@ int enc_get_new_moves(void){
     }
 
     old = counter;
-    lv_label_set_text_fmt(test_label, "   %d ", counter);
+    // lv_label_set_text_fmt(test_label, "   %d ", counter);
     return diff;
 }
 static void freq_slider_event_cb(lv_event_t *event) {
@@ -52,38 +52,6 @@ static void duty_slider_event_cb(lv_event_t *event) {
     lv_snprintf(buf, sizeof(buf), "%d%%", (int)lv_slider_get_value(slider));
     lv_label_set_text(duty_slider_label, buf);
 
-}
-static void freq_event_cb(lv_event_t *event){
-    uint32_t key = lv_indev_get_key(lv_indev_get_act());;
-    lv_obj_t * obj = lv_event_get_target(event);
-    if ((key == 19) & (freq_val >0)){
-        freq_val--;
-    }
-    if ((key == 20) & (freq_val <500))
-    {
-        freq_val++;
-    }
-    char buff[20] = "";
-    sprintf(buff, "freq %d", freq_val);
-    set_period(freq_val, duty_val);
-    lv_textarea_set_text(obj, buff);
-
-}
-
-static void duty_event_cb(lv_event_t *event){
-    uint32_t key = lv_indev_get_key(lv_indev_get_act());
-    lv_obj_t * obj = lv_event_get_target(event);
-    if ((key == 19) & (duty_val >0) ){
-        duty_val--;
-    }
-    if ((key == 20) & (duty_val <99))
-    {
-        duty_val++;
-    }
-    char buff[20] = "";
-    sprintf(buff, "duty %d", duty_val);
-    lv_textarea_set_text(obj, buff);
-    set_period(freq_val, duty_val);
 }
 
 void encoder_read(lv_indev_drv_t * drv, lv_indev_data_t*data){
